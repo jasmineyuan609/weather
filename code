@@ -1,0 +1,23 @@
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Sample weather data for major UK cities
+weather_data = {
+    "London": {"temperature": "15°C", "humidity": "72%", "condition": "Cloudy"},
+    "Manchester": {"temperature": "13°C", "humidity": "80%", "condition": "Rainy"},
+    "Edinburgh": {"temperature": "10°C", "humidity": "75%", "condition": "Overcast"},
+    "Birmingham": {"temperature": "14°C", "humidity": "70%", "condition": "Partly Cloudy"},
+    "Cardiff": {"temperature": "12°C", "humidity": "78%", "condition": "Drizzle"}
+}
+
+@app.route('/weather/<city>', methods=['GET'])
+def get_weather(city):
+    city = city.capitalize()
+    if city in weather_data:
+        return jsonify(weather_data[city])
+    else:
+        return jsonify({"error": "Weather data not available for this city"}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=False)
