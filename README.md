@@ -1,106 +1,127 @@
-#London Weather API
-
-Overview
-
-The London Weather API provides real-time and forecasted weather data for London, UK. This API allows developers to retrieve current temperature, humidity, wind speed, and other meteorological data.
+UK Weather API 
+This project provides a simple Python-based API for retrieving weather data across various cities in the UK. It fetches weather information from an external service (e.g., OpenWeatherMap) and uses Pygame to display it in a graphical interface.
 
 Features
+Fetches weather data for various UK cities.
 
-Real-time weather data for London
+Displays weather information (e.g., temperature, conditions) using Pygame.
 
-7-day weather forecast
+Shows real-time weather updates with a user-friendly interface.
 
-Hourly weather updates
+Requirements
+Python 3.x
 
-Air quality index (AQI)
+Pygame
 
-UV index information
+Requests (for fetching weather data from an external API)
 
-Base URL
+OpenWeatherMap API Key (or similar weather data provider)
 
-https://api.londonweather.com/v1/
+Install Dependencies
+Install the required libraries using pip:
 
-Authentication
+bash
+Copy
+Edit
+pip install pygame requests
+Get an API key from OpenWeatherMap (or another weather provider). You can sign up for a free API key on their website.
 
-To use the API, you need an API key. Register at London Weather API to obtain a key.
+Setup
+Download the project and navigate to the folder containing the code.
 
-Include your API key in the request header:
+Open the file weather_api.py and replace the API_KEY variable with your own key from OpenWeatherMap or another provider.
 
-Authorization: Bearer YOUR_API_KEY
+Run the program:
 
-Endpoints
+bash
+Copy
+Edit
+python weather_api.py
+Usage
+The program will display a graphical interface using Pygame, showing the weather information for a default UK city (e.g., London).
 
-1. Get Current Weather
+You can update the city by typing the name of another city in the input box.
 
-GET /weather/current
+Weather details like temperature, humidity, and conditions will be updated and displayed on the screen.
 
-Response:
+Example Output
+City: London
 
-{
-  "temperature": "15°C",
-  "humidity": "72%",
-  "wind_speed": "10 km/h",
-  "condition": "Cloudy",
-  "aqi": 42,
-  "uv_index": 3
-}
+Temperature: 15°C
 
-2. Get 7-Day Forecast
+Condition: Clear Sky
 
-GET /weather/forecast
+Humidity: 75%
 
-Response:
+Code Example
+python
+Copy
+Edit
+import pygame
+import requests
+import json
 
-{
-  "forecast": [
-    {"day": "Monday", "temperature": "14°C", "condition": "Rainy"},
-    {"day": "Tuesday", "temperature": "16°C", "condition": "Cloudy"},
-    {"day": "Wednesday", "temperature": "17°C", "condition": "Sunny"}
-  ]
-}
+# Pygame setup
+pygame.init()
+screen = pygame.display.set_mode((400, 300))
+pygame.display.set_caption("UK Weather")
 
-3. Get Hourly Weather
+font = pygame.font.SysFont('Arial', 24)
 
-GET /weather/hourly
+# API Configuration
+API_KEY = "your_openweathermap_api_key"
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
 
-Response:
+# Function to fetch weather data
+def get_weather(city):
+    complete_url = BASE_URL + "q=" + city + "&appid=" + API_KEY + "&units=metric"
+    response = requests.get(complete_url)
+    data = response.json()
 
-{
-  "hourly": [
-    {"time": "09:00", "temperature": "14°C", "condition": "Cloudy"},
-    {"time": "12:00", "temperature": "16°C", "condition": "Sunny"}
-  ]
-}
+    if data["cod"] == "404":
+        return None
+    else:
+        main_data = data["main"]
+        weather_data = data["weather"][0]
+        temperature = main_data["temp"]
+        description = weather_data["description"]
+        humidity = main_data["humidity"]
 
-4. Get Air Quality Index
+        return {"temp": temperature, "desc": description, "humidity": humidity}
 
-GET /weather/air-quality
+# Main loop
+running = True
+city = "London"
+weather_info = get_weather(city)
 
-Response:
+while running:
+    screen.fill((255, 255, 255))  # Fill the screen with a white background
 
-{
-  "aqi": 42,
-  "status": "Good"
-}
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-Rate Limits
+    if weather_info:
+        temp_text = font.render(f"Temperature: {weather_info['temp']}°C", True, (0, 0, 0))
+        desc_text = font.render(f"Condition: {weather_info['desc']}", True, (0, 0, 0))
+        humidity_text = font.render(f"Humidity: {weather_info['humidity']}%", True, (0, 0, 0))
 
-Free Tier: 1000 requests/month
+        screen.blit(temp_text, (20, 50))
+        screen.blit(desc_text, (20, 100))
+        screen.blit(humidity_text, (20, 150))
 
-Pro Tier: 10,000 requests/month
+    pygame.display.flip()
 
-Enterprise: Unlimited
+pygame.quit()
+Customization
+Cities: You can change the city by modifying the city variable in the code or adding an input box to let the user enter a city dynamically.
 
-Error Handling
+Weather Information: Modify the get_weather function to display additional weather data like wind speed or pressure.
 
-401 Unauthorized: Invalid or missing API key
+Troubleshooting
+API Key Error: Ensure you've replaced the API_KEY variable with a valid API key from OpenWeatherMap.
 
-404 Not Found: Requested resource not available
+Pygame Issues: Make sure Pygame is correctly installed and that your Python environment is set up properly.
 
-429 Too Many Requests: Rate limit exceeded
-
-500 Internal Server Error: API server issue
-
-Support
-
-For questions and support, contact us at support@londonweather.com.
+License
+This project is open-source and available under the MIT License.
