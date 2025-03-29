@@ -2,19 +2,18 @@ import pygame
 import requests
 import sys
 
-# OpenWeatherMap API key (replace with your own)
-API_KEY = "YOUR_API_KEY"
-BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
+# Open-Meteo API URL
+BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
-# UK Cities and their positions on the map (approximate)
+# UK Cities and their positions on the map (approximate) and coordinates
 cities = {
-    "London": (400, 500),
-    "Manchester": (350, 400),
-    "Birmingham": (380, 450),
-    "Edinburgh": (300, 200),
-    "Cardiff": (320, 520),
-    "Belfast": (200, 300),
-    "Glasgow": (280, 180),
+    "London": ((400, 500), (51.5074, -0.1278)),
+    "Manchester": ((350, 400), (53.4808, -2.2426)),
+    "Birmingham": ((380, 450), (52.4862, -1.8904)),
+    "Edinburgh": ((300, 200), (55.9533, -3.1883)),
+    "Cardiff": ((320, 520), (51.4816, -3.1791)),
+    "Belfast": ((200, 300), (54.5973, -5.9301)),
+    "Glasgow": ((280, 180), (55.8642, -4.2518)),
 }
 
 # Initialize pygame
@@ -29,24 +28,28 @@ pygame.display.set_caption("UK Weather Map")
 # Font
 font = pygame.font.Font(None, 24)
 
-def get_weather(city):
-    params = {"q": city, "appid": API_KEY, "units": "metric"}
+def get_weather(lat, lon):
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "current_weather": True
+    }
     response = requests.get(BASE_URL, params=params)
     if response.status_code == 200:
         data = response.json()
-        temp = data["main"]["temp"]
-        weather = data["weather"][0]["main"]
-        return f"{temp}°C, {weather}"
+        temp = data["current_weather"]["temperature"]
+        weather = data["current_weather"]["weathercode"]  # Numeric weather code
+        return f"{temp}°C, Code {weather}"
     return "No data"
 
 def main():
     running = True
-    weather_data = {city: get_weather(city) for city in cities}
+    weather_data = {city: get_weather(lat, lon) for city, (_, (lat, lon)) in cities.items()}
     
     while running:
         screen.blit(MAP_IMAGE, (0, 0))
         
-        for city, pos in cities.items():
+        for city, (pos, _) in cities.items():
             text = font.render(f"{city}: {weather_data[city]}", True, (255, 255, 255))
             screen.blit(text, pos)
         
@@ -61,4 +64,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
